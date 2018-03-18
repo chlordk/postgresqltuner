@@ -258,23 +258,27 @@ print_header_1("OS information");
 		}
 		# Hardware
 		my $hypervisor='';
-		my @dmesg=os_cmd("dmesg");
-		foreach my $line (@dmesg) {
-			if ($line =~ /vmware/i) {
-				$hypervisor='VMware';
-				last;
-			} elsif ($line =~ /kvm/i) {
-				$hypervisor='KVM';
-				last;
-			} elsif ($line =~ /xen/i) {
-				$hypervisor='XEN';
-				last;
-			} elsif ($line =~ /vbox/i) {
-				$hypervisor='VirtualBox';
-				last;
-			} elsif ($line =~ /hyper-v/i) {
-				$hypervisor='Hyper-V';
-				last;
+		my $hyper_count=`grep -c '^flags.* hypervisor' /proc/cpuinfo`;
+		chomp($hyper_count);
+		if ($hyper_count) {
+			my @dmesg=os_cmd("dmesg");
+			foreach my $line (@dmesg) {
+				if ($line =~ /vmware/i) {
+					$hypervisor='VMware';
+					last;
+				} elsif ($line =~ /xen/i) {
+					$hypervisor='XEN';
+					last;
+				} elsif ($line =~ /vbox/i) {
+					$hypervisor='VirtualBox';
+					last;
+				} elsif ($line =~ /hyper-v/i) {
+					$hypervisor='Hyper-V';
+					last;
+				} elsif ($line =~ /kvm/i) { # Can be found despite on physical
+					$hypervisor='KVM';
+					last;
+				}
 			}
 		}
 		if ($hypervisor) {
